@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -81,8 +82,8 @@ public class OfficesController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get all Offices by given price",content =@Content(mediaType = "application/json") )
     })
-    @GetMapping("/offices?price={price}")
-    public Page<OfficeResource> getAllOfficesByPriceLessThanEqual(@PathVariable(name = "price") Float price, Pageable pageable){
+    @GetMapping("/offices")
+    public Page<OfficeResource> getAllOfficesByPriceLessThanEqual(@RequestParam (value = "price") Float price, Pageable pageable){
         Page<Office> resourcePage = officeService.getAllOfficesByPriceLessThanEqual(price, pageable);
         List<OfficeResource> resources = resourcePage.getContent()
                 .stream().map(this::convertToResource).collect(Collectors.toList());
@@ -93,14 +94,40 @@ public class OfficesController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get all offices by given two prices",content =@Content(mediaType = "application/json") )
     })
-    @GetMapping("/offices?maxprice={price1}&minprice={price2}")
-    public Page<OfficeResource> getAllOfficesByPriceLessThanEqualAndPriceGreaterThanEqual(@PathVariable(name = "price1") Float price1,@PathVariable(name = "price2") Float price2,  Pageable pageable){
+    @GetMapping("/offices")
+    public Page<OfficeResource> getAllOfficesByPriceLessThanEqualAndPriceGreaterThanEqual(@RequestParam (value = "price1") Float price1,@RequestParam(value = "price2") Float price2,  Pageable pageable){
         Page<Office> resourcePage = officeService.getAllOfficesByPriceLessThanEqualAndPriceGreaterThanEqual(price2, price1, pageable);
         List<OfficeResource> resources = resourcePage.getContent()
                 .stream().map(this::convertToResource).collect(Collectors.toList());
         return new PageImpl<>(resources,pageable, resources.size());
     }
 
+    @Operation(summary = "Update Offices",description = "Update Office for given Id",tags = {"offices"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Update information of office for given Id",content =@Content(mediaType = "application/json") )
+    })
+    @PutMapping("/offices/{id}")
+    public OfficeResource updateOffice(@PathVariable(name = "id")   Long officeId,@Valid @RequestBody SaveOfficeResource resource){
+        return convertToResource(officeService.updateOffice(officeId,convertToEntity(resource)));
+    }
+
+    @Operation(summary = "Active Offices",description = "Active a deactivated Office",tags = {"offices"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Change the office's status to activated",content =@Content(mediaType = "application/json") )
+    })
+    @PutMapping("/offices/{accountId}/{id}")
+    public  OfficeResource activeOffice(@PathVariable(name = "accountId")Long accountId,@PathVariable(name = "id") Long officeId){
+        return  convertToResource(officeService.activeOffice(accountId,officeId));
+    }
+
+    @Operation(summary = "Delete Offices",description = "Delete Office for given Id",tags = {"offices"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Delete office for given Id",content =@Content(mediaType = "application/json") )
+    })
+    @DeleteMapping("/offices/{id}")
+    public ResponseEntity<?> deleteOffice(@PathVariable(name="id") Long officeId){
+        return officeService.deleteOffice(officeId);
+    }
 
     private Office convertToEntity(SaveOfficeResource resource){return  mapper.map(resource, Office.class);}
 

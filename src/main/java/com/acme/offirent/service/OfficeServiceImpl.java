@@ -6,6 +6,7 @@ import com.acme.offirent.domain.repository.DistrictRepository;
 import com.acme.offirent.domain.repository.OfficeRepository;
 import com.acme.offirent.domain.service.OfficeService;
 import com.acme.offirent.exception.LockedActionException;
+import com.acme.offirent.exception.ResourceConditionException;
 import com.acme.offirent.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -52,6 +53,21 @@ public class OfficeServiceImpl implements OfficeService {
     public Page<Office> getAllOfficesByPriceLessThanEqualAndPriceGreaterThanEqual(float price1, float price2, Pageable pageable) {
         return officeRepository.findAllOfficesByPriceLessThanEqualAndPriceGreaterThanEqual(price1, price2, pageable)
                 .orElseThrow( ()->new ResourceNotFoundException("Resources offices not found between" + price1 +"and" + price2 + "prices") );
+    }
+
+    @Override
+    public Office activeOffice(Long accountId, Long officeId) {
+        if(accountRepository.findById(accountId).isEmpty())
+            throw new ResourceNotFoundException("Account","Id",accountId);
+
+
+        if(!accountRepository.findById(accountId).get().isPremium())
+            throw new ResourceConditionException("Office","status","activated");
+
+        return officeRepository.findById(officeId).map(office -> {
+            office.setStatus(true);
+            return officeRepository.save(office);
+        }).orElseThrow(()-> new ResourceNotFoundException("Office","Id",officeId));
     }
 
     @Override
