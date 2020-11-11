@@ -3,6 +3,7 @@ package com.acme.offirent;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
@@ -13,5 +14,8 @@ public class OffirentApplication {
         SpringApplication.run(OffirentApplication.class, args);
     }
 
-    public ModelMapper modelMapper(){return new ModelMapper();}
+    @Bean
+    public ModelMapper modelMapper(){
+        return new ModelMapper();
+    }
 }
