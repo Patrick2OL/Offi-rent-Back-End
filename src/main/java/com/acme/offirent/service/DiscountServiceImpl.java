@@ -32,14 +32,25 @@ public class DiscountServiceImpl implements DiscountService {
     
     
     //public Discount findByAccountIdAndDiscountId(Long accountId, Long discountId){}
-
     //crud?
+    
     @Override
     public Discount createDiscount(Discount discount){
         return discountRepository.save(discount);
     }
-    
-    
+
+    @Override
+    public Discount updateDiscount(Long discountId,Discount discountRequest){
+        return discountRepository.findById(discountId).map(discount->{
+            discount.setDescription(discountRequest.getDescription());
+            discount.setPercentage(discountRequest.getPercentage());
+
+            return discountRepository.save(discount);
+        })
+                .orElseThrow(()->
+                        new ResourceNotFoundException("Discount","Id","discountId"));
+
+    }
     
     @Override
     public ResponseEntity<?> deleteDiscount(Long discountId){
