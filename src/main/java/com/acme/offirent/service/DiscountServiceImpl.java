@@ -39,18 +39,7 @@ public class DiscountServiceImpl implements DiscountService {
         return discountRepository.save(discount);
     }
     
-    @Override
-    public Discount updateDiscount(Long discountId,Discount discountRequest){
-        return discountRepository.findById(discountId).map(discount->{
-            discount.setDescription(discountRequest.getDescription());
-            discount.setPercentage(discountRequest.getPercentage());
-
-            return discountRepository.save(discount);
-        })
-        .orElseThrow(()->
-        new ResourceNotFoundException("Discount","Id","discountId"));
-            
-    }
+    
     
     @Override
     public ResponseEntity<?> deleteDiscount(Long discountId){
